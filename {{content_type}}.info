@@ -1,0 +1,6 @@
+name = {{content_type}}
+description = Adds {{content_type}} custom node type functionality to Drupal.
+core = 7.x
+package = {{content_type}}
+dependencies[] = comment
+dependencies[] = pathauto
