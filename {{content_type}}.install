@@ -1,0 +1,66 @@
+<?php
+/**
+ * Implements hook_requirements($phase)
+ */
+function {{content_type}}requirements($phase){
+	$requirements = array();
+  	$t = get_t();
+
+	switch ($phase) {
+		case 'install':
+			//Place any installation requirements here
+		break;
+	}
+	return $requirements;
+}
+
+
+/**
+ * Implememnts hook_install()
+ */
+function {{content_type}}install(){
+	node_types_rebuild();
+	$types = node_type_get_types();
+  	$t = get_t();
+
+	// HOOK INTO ADDITIONAL INSTALLATION ACTIONS
+}
+
+
+/**
+ * Implements hook_enable()
+ */
+function {{content_type}}enable(){
+	node_types_rebuild();
+	$types = node_type_get_types();
+  	$t = get_t();
+
+  	//HOOK INTO MODULE ENABLE ACTIONS
+}
+
+
+/**
+ * Implememnts hook_uninstall()
+ */
+function {{content_type}}uninstall(){
+	node_types_rebuild();
+	$types = node_type_get_types();
+  	$t = get_t();
+
+	// Delete Custom Variables
+	if(_{{content_type}}delete_variables() == FALSE){
+		watchdog('{{content_type}}', 'Unable to cleanup the variable table.', WATCHDOG_ERROR);
+		drupal_set_message($t('Unable to cleanup the variable table'), 'error');
+	}
+
+}
+
+/**
+ * Remove all custom Variables for eHelpdesk
+ */
+function _{{content_type}}delete_variables(){
+
+	// Remove Configuration Setting Variables
+
+	return TRUE;
+}
