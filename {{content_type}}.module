@@ -1,0 +1,135 @@
+<?php
+
+/**
+ * @file
+ * Create a Custom Content Type
+ */
+
+/**
+ * Implements hook_node_info().
+ * 
+ * We use hook_node_info() to define our node content type.
+ */
+
+function {{content_type}}_node_info() {
+	// We define the node type as an associative array.
+	return array(
+		'{{content_type}}' => array(
+			'name' => t('Lorem Ipsum '),
+		// 'base' tells Drupal the base string for hook functions.
+		// This is often the module name; if base is set to 'mymodule',
+		// Drupal would call mymodule_insert() or similar for node
+		// hooks.
+			'base' => '{{content_type}}',
+			'description' => t('Use <em>{{content_type}}</em> to lorem ipsum dolor sit amet.'),
+			'title_label' => t('Title'),
+		'custom' => FALSE, // Custom indicates whether or not this was created via the UI and can be modified
+		'locked' => TRUE, // Locked indicates whether or not the machine name can be altered by an end user
+		),
+	);
+}
+
+
+/**
+ * Implements hook_form().
+ *
+ * Drupal needs for us to provide a form that lets the user
+ * add content. Note: The name of this hook should follow the content type's base, not your module name.
+ */
+
+function {{content_type}}_form($node, $form_state) {
+	return node_content_form($node, $form_state);
+}
+
+
+/**
+ * Implements hook_node_type_insert().
+ *
+ * Acts upon a node type being nserted into the database
+ *
+ * This is where fields and configurations should be initialized
+ *
+ * IMPORTANT NOTE: Currently there is a bug with node_info and node_type_insert, as when a node is created with node_info, 
+ * it does not get removed from the node_type table during the uninstallation process. This prevents the node_type_insert function
+ * from firing upon a subsequent installation of the module. Currently, it appears the only workaround is to implement an override in the .install file
+ * This may also be an issue that cascades across into node_type_delete and should be researched further for the cleanest installation
+ * process possible.
+ *
+ */
+
+function {{content_type}}_node_type_insert($info) {
+	if ($info->type == {{content_type}}) {
+
+	// Add default body field to the node type
+		$body_instance = node_add_body_field($info, t('Body'));
+		$body_instance['display']['{{content_type}}_list'] = array(
+			'label' => 'hidden',
+			'type' => 'text_summary_or_trimmed',
+			);
+		field_update_instance($body_instance);
+
+	// Define custom settings for the node type
+		_{{content_type}}_node_settings_set($info);
+	}
+}
+
+/*
+ * Implements hook_permission()
+ */
+function {{content_type}}_permission(){
+	//Define Permissions
+	$perm = array(
+		'access {{content_type}} content'=>array(
+			"title"=>t("Access {{content_type}} Content")
+			),
+		);
+	return $perm;
+}
+
+
+/**
+ * Implements hook_node_access($node,$op,$account)
+ *
+ * This hook does not invoke for User(1)
+ *
+ * Important: If you do not want to actively grant or block access, return NODE_ACCESS_IGNORE
+ *
+ */
+
+function {{content_type}}_node_access($node,$op,$account){
+	$type = is_string($node) ? $node : $node->type;
+
+	if($type == {{content_type}}){
+		if ($op == 'view' && !user_access('access {{content_type}} content', $account)) {
+			return NODE_ACCESS_DENY;
+		}
+	}
+	return NODE_ACCESS_IGNORE;
+}
+
+/**
+ * Implements Custom _{{content_type}}_node_settings_set()
+ *
+ * Sets default node type settings through the implementation of variables
+ *
+ */
+
+function _{{content_type}}_node_settings_set($info){
+	$type = $info->type;
+
+	// Disable Comments
+	if(module_exists('comment')){
+		variable_set('comment_'.$type, '1');
+	}
+
+	// Define URL alias pattern
+	if(module_exists('pathauto')){
+		variable_set('pathauto_node_'.$type.'_pattern','{{content_type_URL_pattern}}');
+	}
+
+	// Define Menu Path 
+	if(module_exists('menu')){
+	// Set the Available Menu Option Default
+		variable_set('menu_options_{{content_type}}',array('{{content_type_default_menu}}'));	
+	}
+}
